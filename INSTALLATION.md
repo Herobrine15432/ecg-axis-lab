@@ -23,9 +23,11 @@ Before starting, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/ecg-axis-lab.git
+git clone https://github.com/herobrine15432/ecg-axis-lab.git
 cd ecg-axis-lab
 ```
+
+Note: this repository is highly experimental and may receive infrequent updates.
 
 ### 2. Backend Setup
 

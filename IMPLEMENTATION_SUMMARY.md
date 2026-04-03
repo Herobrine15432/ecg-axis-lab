@@ -7,6 +7,14 @@ A complete, working MVP web application for visual exploration of ECG lead geome
 **Date Completed:** April 3, 2026
 **Status:** MVP Ready for Development & Testing
 
+## Repository Status
+
+This codebase is a highly experimental MVP.
+
+- It is suitable for study, demos, and prototyping.
+- Interfaces and internal behavior may change quickly.
+- Future updates are expected to be occasional, not continuous.
+
 ## What Was Built
 
 ### ✅ Backend (FastAPI + Python)

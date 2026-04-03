@@ -2,6 +2,14 @@
 
 Thank you for your interest in contributing! This document provides guidelines for contributing.
 
+## Maintenance Expectations
+
+ECG Axis Lab is a highly experimental repository.
+
+- New contributions are welcome, but merge/review time may be longer than usual.
+- Backward compatibility is not guaranteed across iterations.
+- Major roadmap commitments are intentionally limited.
+
 ## Code of Conduct
 
 - Be respectful and inclusive
@@ -212,4 +220,4 @@ Releases follow semantic versioning (MAJOR.MINOR.PATCH):
 - Ask in GitHub Discussions
 - Review relevant documentation in `docs/`
 
-Thank you for contributing! 🎉
+Thank you for contributing.

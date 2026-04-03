@@ -28,6 +28,14 @@ export interface ReconstructionResult {
   observedValues: Record<string, number>
   residualError?: number
   notes: string[]
+  teachingEnabled?: boolean
+  teachingDynamic?: boolean
+  teachingHeartRateBpm?: number
+  teachingBeatPeriodMs?: number
+  teachingPhaseMs?: number
+  teachingGlobalTimeMs?: number
+  teachingComponentTimesMs?: Record<string, number>
+  aqrsHistoryDeg?: number[]
 }
 
 export interface DemoMetadata {
@@ -48,6 +56,10 @@ export interface AppState {
   timeWindowEnd: number | null
   isLoading: boolean
   error: string | null
+  
+  // Teaching mode playback control
+  teachingIsPlaying: boolean
+  teachingManualTimeMs: number | null
   
   // Simulation
   simulationAngle: number

@@ -31,6 +31,8 @@ All notable changes to ECG Axis Lab will be documented in this file.
 - Data summary and reconstruction results display
 - API client with error handling
 - Responsive layout
+- Teaching monitor mode with fixed reference grid
+- Playback controls (play/pause/scrub) and fixed NOW marker
 
 #### Documentation
 - Comprehensive README with setup instructions
@@ -72,7 +74,7 @@ All notable changes to ECG Axis Lab will be documented in this file.
 - No PDF/image ECG parsing
 - 2D geometry (frontal plane only)
 - Simple preprocessing (no advanced filtering)
-- Static projections (no temporal animation)
+- Temporal animation is educational/synthetic only (not physiologic modeling)
 
 ### Known Issues
 
@@ -81,4 +83,10 @@ All notable changes to ECG Axis Lab will be documented in this file.
 - No export functionality
 - Limited error messages for invalid data
 
-[0.1.0]: https://github.com/yourusername/ecg-axis-lab/releases/tag/v0.1.0
+### Repository Lifecycle Note
+
+- This repository is intentionally experimental.
+- Backward compatibility is not guaranteed between versions.
+- Ongoing updates may be infrequent.
+
+[0.1.0]: https://github.com/herobrine15432/ecg-axis-lab/releases/tag/v0.1.0

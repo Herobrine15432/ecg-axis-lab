@@ -12,12 +12,14 @@ Get ECG Axis Lab running in 5 minutes.
 
 ```bash
 # Clone and setup everything
-git clone <repo> && cd ecg-axis-lab
+git clone https://github.com/herobrine15432/ecg-axis-lab.git && cd ecg-axis-lab
 cd apps/api
 conda env create -f environment.yml -y
 cd ../web
 npm install
 ```
+
+Note: this repository is highly experimental and may receive infrequent updates.
 
 ## Start the Application
 
@@ -110,12 +112,12 @@ Local: http://localhost:5173/
 
 ## Support
 
-- 🔧 Setup issues: See [INSTALLATION.md](INSTALLATION.md)
-- 💻 Development: See [DEVELOPMENT.md](DEVELOPMENT.md)
-- 📖 Math: See [docs/math-model.md](docs/math-model.md)
-- 🤝 Issues: GitHub Issues
-- 📝 Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Setup issues: See [INSTALLATION.md](INSTALLATION.md)
+- Development: See [DEVELOPMENT.md](DEVELOPMENT.md)
+- Math: See [docs/math-model.md](docs/math-model.md)
+- Issues: GitHub Issues
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
-**Ready to go!** Questions? Check the documentation or open an issue. 🚀
+Ready to go. Questions? Check the documentation or open an issue.

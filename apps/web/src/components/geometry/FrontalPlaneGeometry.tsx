@@ -111,6 +111,15 @@ export const FrontalPlaneGeometry: React.FC = () => {
   const pII = leadPoint('II')
   const pIII = leadPoint('III')
   const showEinthoven = reconstruction.canRenderEinthoven && pI && pII && pIII
+  const hasLeadIII = currentData.availableLeads.includes('III')
+
+  const historyPoints = (reconstruction.aqrsHistoryDeg || []).map((angle) => {
+    const rad = (angle - 90) * Math.PI / 180
+    return {
+      x: center + radius * 0.65 * Math.cos(rad),
+      y: center + radius * 0.65 * Math.sin(rad),
+    }
+  })
 
   const ra = { x: center - 92, y: center - 58 }
   const la = { x: center + 92, y: center - 58 }
@@ -119,6 +128,10 @@ export const FrontalPlaneGeometry: React.FC = () => {
     x: (ra.x + la.x + ll.x) / 3,
     y: (ra.y + la.y + ll.y) / 3,
   }
+
+  const aqrsRad = reconstruction.vectorAngleDeg !== undefined
+    ? (reconstruction.vectorAngleDeg - 90) * Math.PI / 180
+    : undefined
 
   return (
     <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
@@ -182,16 +195,46 @@ export const FrontalPlaneGeometry: React.FC = () => {
           
           {/* Vector */}
           {vectorElement}
+
+          {/* AQRS history trail */}
+          {historyPoints.map((p, idx) => (
+            <circle
+              key={`aqrs-h-${idx}`}
+              cx={p.x}
+              cy={p.y}
+              r={1.8}
+              fill="#f97316"
+              opacity={(idx + 1) / Math.max(historyPoints.length, 1)}
+            />
+          ))}
+
+          {/* AQRS label */}
+          {aqrsRad !== undefined && (
+            <text
+              x={center + radius * 0.78 * Math.cos(aqrsRad)}
+              y={center + radius * 0.78 * Math.sin(aqrsRad)}
+              fontSize="10"
+              fill="#ef4444"
+              fontWeight="700"
+            >
+              AQRS
+            </text>
+          )}
         </svg>
 
         <div className="mt-4 text-sm">
+          {!showEinthoven && !hasLeadIII && (
+            <p className="text-xs text-amber-700 mb-2 font-medium">
+              Add lead III to display the complete Einthoven triangle.
+            </p>
+          )}
           {showEinthoven && (
             <p className="text-xs text-ecg-700 mb-2 font-medium">Einthoven triangle is active (I, II, III)</p>
           )}
           {reconstruction.vectorAngleDeg !== undefined && (
             <div className="grid grid-cols-2 gap-2 text-center">
               <div className="bg-blue-50 p-2 rounded">
-                <div className="text-xs text-gray-600">Angle</div>
+                <div className="text-xs text-gray-600">AQRS Angle</div>
                 <div className="font-semibold text-ecg-600">
                   {reconstruction.vectorAngleDeg.toFixed(1)}°
                 </div>

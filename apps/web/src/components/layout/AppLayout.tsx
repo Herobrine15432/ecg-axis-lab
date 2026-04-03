@@ -6,6 +6,7 @@ import { SimulationControl } from '../input/SimulationControl'
 import { TeachingLab } from '../input/TeachingLab'
 import { SignalViewer } from '../plots/SignalViewer'
 import { FrontalPlaneGeometry } from '../geometry/FrontalPlaneGeometry'
+import { HeartActivityPanel } from '../geometry/HeartActivityPanel'
 import { DataSummary } from '../layout/DataSummary'
 import { useStore } from '../../store'
 
@@ -22,21 +23,26 @@ export const AppLayout: React.FC = () => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Left sidebar: Controls */}
-          <div className="lg:col-span-3 space-y-4">
+      <div className="max-w-[1500px] mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          {/* Controls */}
+          <div className="xl:col-span-3 space-y-4">
             <DataUpload />
             <DemoSelector />
             <TeachingLab />
             <SimulationControl />
-            <DataSummary />
           </div>
 
-          {/* Main content: Visualizations */}
-          <div className="lg:col-span-9 space-y-4">
+          {/* Main visual workspace */}
+          <div className="xl:col-span-6 space-y-4">
             <SignalViewer />
             <FrontalPlaneGeometry />
+          </div>
+
+          {/* Insights: always visible */}
+          <div className="xl:col-span-3 space-y-4 xl:sticky xl:top-4 self-start">
+            <DataSummary />
+            <HeartActivityPanel />
           </div>
         </div>
       </div>

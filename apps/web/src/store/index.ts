@@ -13,6 +13,8 @@ interface StoreState extends AppState {
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   setSimulationParams: (angle: number, magnitude: number) => void
+  setTeachingIsPlaying: (playing: boolean) => void
+  setTeachingManualTimeMs: (timeMs: number | null) => void
   reset: () => void
 }
 
@@ -24,6 +26,8 @@ const initialState: AppState = {
   timeWindowEnd: null,
   isLoading: false,
   error: null,
+  teachingIsPlaying: true,
+  teachingManualTimeMs: null,
   simulationAngle: 45,
   simulationMagnitude: 1.0,
 }
@@ -50,6 +54,10 @@ export const useStore = create<StoreState>((set) => ({
     simulationAngle: angle,
     simulationMagnitude: magnitude,
   }),
+  
+  setTeachingIsPlaying: (playing: boolean) => set({ teachingIsPlaying: playing }),
+  
+  setTeachingManualTimeMs: (timeMs: number | null) => set({ teachingManualTimeMs: timeMs }),
   
   reset: () => set(initialState),
 }))

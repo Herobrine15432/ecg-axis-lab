@@ -55,12 +55,24 @@ export const DataSummary: React.FC = () => {
                 ✓ Frontal vector available
                 {reconstruction.vectorAngleDeg !== undefined && (
                   <div className="mt-1">
-                    Angle: {reconstruction.vectorAngleDeg.toFixed(1)}° | 
+                    AQRS: {reconstruction.vectorAngleDeg.toFixed(1)}° | 
                     Magnitude: {reconstruction.vectorMagnitude?.toFixed(2)}
                   </div>
                 )}
               </div>
             )}
+            <div className="text-xs bg-slate-50 p-2 rounded border border-slate-200">
+              <p className="font-medium text-slate-700">What is AQRS?</p>
+              <p className="text-slate-600">
+                AQRS is the mean QRS axis in the frontal plane. In the geometry panel it is the red vector.
+              </p>
+              {reconstruction.teachingEnabled && reconstruction.teachingPhaseMs !== undefined && (
+                <p className="text-slate-600 mt-1">
+                  Current beat phase: {reconstruction.teachingPhaseMs.toFixed(0)} ms
+                  {reconstruction.teachingBeatPeriodMs ? ` / ${reconstruction.teachingBeatPeriodMs.toFixed(0)} ms` : ''}
+                </p>
+              )}
+            </div>
             {reconstruction.notes.length > 0 && (
               <div className="text-xs space-y-1">
                 {reconstruction.notes.map((note, i) => (

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store'
 import { ReconstructionResult, SignalRecord } from '../../types'
 
@@ -23,6 +23,8 @@ const PRECORDIAL_PHASE: Record<string, number> = {
 const AVAILABLE_LEADS = [
   'I', 'II', 'III', 'aVR', 'aVL', 'aVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6',
 ]
+
+const MONITOR_PLAYHEAD_FRACTION = 0.6
 
 type ComponentConfig = {
   pAmp: number
@@ -82,7 +84,13 @@ function generateLeadSamples(
 }
 
 export const TeachingLab: React.FC = () => {
-  const { setCurrentData, setReconstruction } = useStore()
+  const {
+    setCurrentData,
+    setReconstruction,
+    teachingIsPlaying,
+    teachingManualTimeMs,
+    setTeachingManualTimeMs,
+  } = useStore()
 
   const [enabled, setEnabled] = useState(false)
   const [hr, setHr] = useState(72)
@@ -90,7 +98,6 @@ export const TeachingLab: React.FC = () => {
   const [angleSwing, setAngleSwing] = useState(20)
   const [magnitude, setMagnitude] = useState(1.0)
   const [noise, setNoise] = useState(0.005)
-  const [isDynamic, setIsDynamic] = useState(true)
   const [selectedLeads, setSelectedLeads] = useState<string[]>(['I', 'II', 'III', 'aVR', 'aVL', 'aVF'])
 
   const [pAmp, setPAmp] = useState(0.08)
@@ -99,15 +106,51 @@ export const TeachingLab: React.FC = () => {
   const [sAmp, setSAmp] = useState(0.22)
   const [tAmp, setTAmp] = useState(0.32)
 
-  const [tick, setTick] = useState(0)
+  const [globalTimeMs, setGlobalTimeMs] = useState(0)
+  const [aqrsHistoryDeg, setAqrsHistoryDeg] = useState<number[]>([])
+
+  // Use refs to track timing without re-renders
+  const startTimeRef = useRef<number | null>(null)
+  const rafIdRef = useRef<number | null>(null)
+
+  // Animation loop using requestAnimationFrame for smooth, synchronized timing
+  useEffect(() => {
+    if (!enabled || !teachingIsPlaying) {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current)
+      startTimeRef.current = null
+      return
+    }
+
+    startTimeRef.current = Date.now()
+    const resumeBaseMs = teachingManualTimeMs ?? globalTimeMs
+
+    if (teachingManualTimeMs !== null) {
+      setTeachingManualTimeMs(null)
+    }
+
+    const animate = () => {
+      const elapsed = Date.now() - (startTimeRef.current || Date.now())
+      setGlobalTimeMs(resumeBaseMs + elapsed)
+      rafIdRef.current = requestAnimationFrame(animate)
+    }
+
+    rafIdRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current)
+    }
+  }, [
+    enabled,
+    setTeachingManualTimeMs,
+    teachingIsPlaying,
+    teachingManualTimeMs,
+  ])
 
   useEffect(() => {
-    if (!isDynamic) return
-    const id = window.setInterval(() => {
-      setTick((v) => v + 1)
-    }, 180)
-    return () => window.clearInterval(id)
-  }, [isDynamic])
+    if (teachingManualTimeMs !== null) {
+      setGlobalTimeMs(teachingManualTimeMs)
+    }
+  }, [teachingManualTimeMs])
 
   const componentConfig = useMemo<ComponentConfig>(() => ({
     pAmp,
@@ -118,13 +161,32 @@ export const TeachingLab: React.FC = () => {
   }), [pAmp, qAmp, rAmp, sAmp, tAmp])
 
   useEffect(() => {
+    if (!enabled) {
+      setAqrsHistoryDeg([])
+      return
+    }
+
+    const dynamicAngle = baseAngle + angleSwing * Math.sin((globalTimeMs / 1000) * 0.2)
+    setAqrsHistoryDeg((prev) => [...prev, dynamicAngle].slice(-40))
+  }, [angleSwing, baseAngle, enabled, globalTimeMs])
+
+  useEffect(() => {
     if (!enabled) return
     if (selectedLeads.length === 0) return
 
+    // Use manual time if user is dragging, otherwise use animated time
+    const currentTimeMs = teachingManualTimeMs !== null ? teachingManualTimeMs : globalTimeMs
+
     const fs = 500
     const sampleCount = 1200
-    const phaseShiftSec = tick * 0.04
-    const dynamicAngle = baseAngle + (isDynamic ? angleSwing * Math.sin(tick * 0.2) : 0)
+    const beatPeriodMs = (60 / hr) * 1000
+    const beatPeriodSec = beatPeriodMs / 1000
+    // Keep NOW aligned with the fixed playhead used by the monitor.
+    const monitorWindowSec = sampleCount / fs
+    const playheadOffsetSec = monitorWindowSec * MONITOR_PLAYHEAD_FRACTION
+    const phaseShiftSec = ((currentTimeMs / 1000) - playheadOffsetSec) % beatPeriodSec
+    const beatPhaseMs = ((currentTimeMs) % beatPeriodMs + beatPeriodMs) % beatPeriodMs
+    const dynamicAngle = baseAngle + angleSwing * Math.sin((currentTimeMs / 1000) * 0.2)
 
     const leads: Record<string, number[]> = {}
     selectedLeads.forEach((lead) => {
@@ -173,9 +235,24 @@ export const TeachingLab: React.FC = () => {
       projectedValues,
       observedValues,
       residualError: 0,
+      teachingEnabled: true,
+      teachingDynamic: angleSwing !== 0,
+      teachingHeartRateBpm: hr,
+      teachingBeatPeriodMs: beatPeriodMs,
+      teachingPhaseMs: beatPhaseMs,
+      teachingGlobalTimeMs: currentTimeMs,
+      teachingComponentTimesMs: {
+        P: 180,
+        Q: 340,
+        R: 360,
+        S: 390,
+        T: 580,
+      },
+      aqrsHistoryDeg,
       notes: [
         'Teaching mode: generated from explicit P/Q/R/S/T components.',
-        isDynamic ? 'Dynamic mode active: frontal vector angle oscillates over time.' : 'Static mode: fixed frontal vector.',
+        `AQRS is the red frontal vector. Current AQRS: ${dynamicAngle.toFixed(1)}°`,
+        angleSwing !== 0 ? 'Dynamic mode active: frontal vector angle oscillates over time.' : 'Static mode: fixed frontal vector.',
       ],
     }
 
@@ -186,14 +263,15 @@ export const TeachingLab: React.FC = () => {
     baseAngle,
     componentConfig,
     enabled,
+    globalTimeMs,
     hr,
-    isDynamic,
     magnitude,
     noise,
     selectedLeads,
     setCurrentData,
     setReconstruction,
-    tick,
+    teachingManualTimeMs,
+    aqrsHistoryDeg,
   ])
 
   const toggleLead = (lead: string) => {
@@ -263,11 +341,6 @@ export const TeachingLab: React.FC = () => {
             <input type="range" min="0.05" max="0.6" step="0.01" value={tAmp} onChange={(e) => setTAmp(Number(e.target.value))} className="w-full" />
           </label>
         </div>
-
-        <label className="inline-flex items-center gap-2 text-xs">
-          <input type="checkbox" checked={isDynamic} onChange={(e) => setIsDynamic(e.target.checked)} />
-          Dynamic ECG (time-varying vector)
-        </label>
 
         <div>
           <p className="text-xs font-medium text-gray-700 mb-1">Displayed leads</p>
