@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+.ecg-grid {
+  @apply bg-white grid grid-cols-1 lg:grid-cols-12 gap-4;
+}
+
+.ecg-signal-container {
+  @apply bg-white rounded-lg shadow p-4 border border-gray-200;
+}
+
+.ecg-geometry-container {
+  @apply bg-white rounded-lg shadow p-4 border border-gray-200;
+}
+
+.demo-button {
+  @apply px-4 py-2 bg-ecg-600 text-white rounded hover:bg-ecg-700 transition-colors;
+}

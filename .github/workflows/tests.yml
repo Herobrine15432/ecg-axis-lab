@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: latest
+          auto-activate-base: true
+          activate-environment: ecg-axis-lab
+          environment-file: apps/api/environment.yml
+      
+      - name: Run pytest
+        shell: bash -l {0}
+        working-directory: apps/api
+        run: |
+          conda activate ecg-axis-lab
+          pytest tests/ -v --cov=app
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        working-directory: apps/web
+        run: npm install
+      
+      - name: Build
+        working-directory: apps/web
+        run: npm run build
